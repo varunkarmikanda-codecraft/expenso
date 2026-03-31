@@ -1,0 +1,1 @@
+export type ValidatorFn = (input: string) => boolean;
