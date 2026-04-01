@@ -95,6 +95,17 @@ const updateFriend = async () => {
     }
 }
 
+const removeFriend = async () => {
+    const query = await ask('Enter search query: ');
+
+    if(!query) {
+        console.log("Enter to search")
+        return
+    }
+
+    friendController.removeFriends(query);
+}
+
 export const manageFriend = async () => {
     while(true) {
         const choice = await choose('\nWhat do you want to do?', options, false);
@@ -110,7 +121,7 @@ export const manageFriend = async () => {
                 await updateFriend()
                 break;
             case '4':
-                console.log('Remove friend...');
+                await removeFriend()
                 break;
             case '5':
                 console.log('Exiting...');
