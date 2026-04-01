@@ -1,6 +1,6 @@
 export interface PageOptions { 
   offset: number, 
-  linit: number 
+  limit: number 
 }
 
 export interface PageResult<T> {
