@@ -61,4 +61,26 @@ export class FriendRepository {
     }
     return false;
   }
+
+  removeFriends(query: string) {
+    const friend = this.searchFriends(query);
+    const friendToDelete = friend.data[0];
+
+    if(!friendToDelete) {
+      console.log('Friend not found!');
+      return;
+    }
+
+    if(friendToDelete?.balance !== 0) {
+      console.log('Need to settle the balance before deleting friend');
+      return;
+    }
+
+    const index = this.friends.findIndex(friend => friend.id === friendToDelete?.id);
+    if(index !== -1) {
+      this.friends.splice(index, 1);
+      return true;
+    }
+    return false;
+  }
 }

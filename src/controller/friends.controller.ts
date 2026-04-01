@@ -46,4 +46,11 @@ export class FriendsController{
         console.log(`Updated ${friend.name}...`)
         return FriendRepository.getInstance().updateFriends(friend);
     }
+    removeFriends(query: string) {
+        if(!FriendRepository.getInstance()) {
+            return { success: false };
+        }
+        console.log(`Deleted ${query}...`)
+        FriendRepository.getInstance().removeFriends(query);
+    }
 }
