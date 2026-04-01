@@ -6,12 +6,15 @@ export class FriendsController{
     getFriends() {
         return FriendRepository.getInstance().f;
     }
+    
     checkEmailExists(email:string){
         return false;
     }
+
     checkPhoneExists(phone:string){
         return false;
     }
+
     addFriend(friend:iFriend){
         if(!FriendRepository.getInstance()){
             return { success:false }
@@ -19,26 +22,19 @@ export class FriendsController{
         console.log('Adding friend to database...',friend)
         FriendRepository.getInstance().addFriend(friend);
     }
+
     searchFriends(query: string) {
-        if(!FriendRepository.getInstance()){
-            return { success:false }
-        }
         console.log('Search for friend in database...');
-        const res = FriendRepository.getInstance().searchFriends(query)
-        if(!res.data || res.data.length === 0) {
-            console.log('No data matched!')
-            return
-        }
-        res.data.forEach((friend) => {
-            console.log(friend)
-        })
+        return FriendRepository.getInstance().searchFriends(query, { offset: 0, limit: FriendRepository.getInstance().f.length})
     }
+
     findFriend(name: string) {
         if(!FriendRepository.getInstance()) {
             return undefined;
         }
         return FriendRepository.getInstance().findFriendByName(name)
     }
+
     updateFriends(friend: iFriend) {
         if(!FriendRepository.getInstance()) {
             return { success: false };
@@ -46,11 +42,16 @@ export class FriendsController{
         console.log(`Updated ${friend.name}...`)
         return FriendRepository.getInstance().updateFriends(friend);
     }
-    removeFriends(query: string) {
+    
+    removeFriends(name: string) {
         if(!FriendRepository.getInstance()) {
             return { success: false };
         }
-        console.log(`Deleted ${query}...`)
-        FriendRepository.getInstance().removeFriends(query);
+        console.log(`Deleted ${name}...`)
+        FriendRepository.getInstance().removeFriends(name);
+    }
+
+    allFriends() {
+        return FriendRepository.getInstance().f;
     }
 }

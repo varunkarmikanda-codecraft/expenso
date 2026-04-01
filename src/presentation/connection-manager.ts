@@ -1,4 +1,5 @@
 import { FriendsController } from "../controller/friends.controller.js";
+import { displayTable } from "../core/display-table.js";
 import { openInteractionManager, type Choice } from "./interaction-manager.js";
 
 const options: Choice[] = [
@@ -6,7 +7,8 @@ const options: Choice[] = [
     { label: 'Search friend', value: '2'},
     { label: 'Update friend', value: '3'},
     { label: 'Remove friend', value: '4'},
-    { label: 'Exit', value: '5'},
+    { label: 'All friends', value: '5'},
+    { label: 'Exit', value: '6'},
 ];
 
 const { ask, choose, close } = openInteractionManager();
@@ -42,7 +44,12 @@ const searchFriend = async () => {
         return
     }
     
-    friendController.searchFriends(query)
+    const result = friendController.searchFriends(query);
+    if (!result.data || result.data.length === 0) {
+        console.log('No data matched!')
+        return
+    }
+    displayTable(result.data)
 }
 
 const updateFriend = async () => {
@@ -96,14 +103,26 @@ const updateFriend = async () => {
 }
 
 const removeFriend = async () => {
-    const query = await ask('Enter search query: ');
 
-    if(!query) {
-        console.log("Enter to search")
-        return
+    const name = await ask('Enter the name of the friend to update: ');
+    if (!name) {
+        console.log('Please enter a name')
+        return;
     }
 
-    friendController.removeFriends(query);
+    friendController.removeFriends(name);
+
+}
+
+const allFriends = async () => {
+    const allFriends = friendController.allFriends();
+
+    if(allFriends.length === 0) {
+        console.log("No friends");
+        return;
+    }
+
+    displayTable(allFriends);
 }
 
 export const manageFriend = async () => {
@@ -123,7 +142,10 @@ export const manageFriend = async () => {
             case '4':
                 await removeFriend()
                 break;
-            case '5':
+            case '5': 
+                await allFriends();
+                break;
+            case '6':
                 console.log('Exiting...');
                 close()
                 return;
