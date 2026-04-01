@@ -11,10 +11,17 @@ export class FriendRepository {
     return FriendRepository.instance;
   }
 
+  get f () {
+    return this.friends;
+  }
+
   private constructor() {}
   addFriend(friend: iFriend) {
     this.friends.push(friend);
-    console.log("Friend added to repository:", friend);
+  }
+
+  findFriendByName(name: string) {
+    return this.friends.find((friend) => friend.name === name);
   }
 
   findFriendByEmail(email: string) {
@@ -35,6 +42,7 @@ export class FriendRepository {
       )
     });
 
+    console.log('Search complete');
     return {
       data: filtered.slice(
         pageOption?.offset || 0,
@@ -43,5 +51,14 @@ export class FriendRepository {
       matched: filtered.length,
       total: this.friends.length,
     };
+  }
+
+  updateFriends(updatedFriend: iFriend) {
+    const index = this.friends.findIndex(friend => friend.id === updatedFriend.id);
+    if(index !== -1) {
+      this.friends[index] = updatedFriend;
+      return true;
+    }
+    return false;
   }
 }

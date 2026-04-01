@@ -28,7 +28,7 @@ const addFriend = async () => {
         name: name,
         email: email,
         phone: phone,
-        balance: Number(openingBalance)
+        balance: Number(openingBalance) || 0
     }
 
     friendController.addFriend(friend)
@@ -45,6 +45,56 @@ const searchFriend = async () => {
     friendController.searchFriends(query)
 }
 
+const updateFriend = async () => {
+    const updateOptions: Choice[] = [
+        { label: "Name", value: "1"},
+        { label: "Email", value: "2"},
+        { label: "Phone number", value: "3"},
+        { label: "Balance", value: "4"},
+    ];
+
+    const name = await ask('Enter the name of the friend to update: ');
+    if(!name) {
+        console.log('Please enter a name')
+        return;
+    }
+    const friend = friendController.findFriend(name);
+
+    if(!friend) {
+        console.log('Not found!')
+        return;
+    }
+
+    
+    const choice = await choose('\nWhat do you want to update? ', updateOptions, false);
+
+    switch(choice?.value) {
+        case '1': 
+            const updatedName = await ask(`Enter new name: (current: ${friend.name}) `);
+            if(updatedName) friend.name = updatedName;
+            friendController.updateFriends(friend);
+            break
+        case '2':
+            const updatedEmail = await ask(`Enter new email: (current: ${friend.email}) `);
+            if(updatedEmail) friend.email = updatedEmail;
+            friendController.updateFriends(friend);
+            break;
+        case '3':
+            const updatedPhone = await ask(`Enter new phone number: (current: ${friend.phone}) `);
+            if(updatedPhone) friend.phone = updatedPhone;
+            friendController.updateFriends(friend);
+            break;
+        case '4':
+            const updatedBalance = await ask(`Enter new balance: (current: ${friend.balance}) `);
+            if(updatedBalance) friend.balance = Number(updatedBalance);
+            friendController.updateFriends(friend);
+            break;
+        case '5':
+            console.log('Exit update');
+            break;
+    }
+}
+
 export const manageFriend = async () => {
     while(true) {
         const choice = await choose('\nWhat do you want to do?', options, false);
@@ -57,7 +107,7 @@ export const manageFriend = async () => {
                 await searchFriend()
                 break;
             case '3':
-                console.log('Updating friend...');
+                await updateFriend()
                 break;
             case '4':
                 console.log('Remove friend...');

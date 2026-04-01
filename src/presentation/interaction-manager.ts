@@ -33,7 +33,7 @@ export const openInteractionManager = () => {
     const choose: (question: string, choices: Choice[], optional?: boolean) => Promise<Choice | undefined> = async (question, choices, optional) => {
         console.log(question);
         choices.forEach((choice) => {
-            console.log(`${choice.label}. ${choice.value}`);
+            console.log(`${choice.value}. ${choice.label}`);
         })
         const choice = await ask('Please enter your choice: ', {
             validator: (input) => {
