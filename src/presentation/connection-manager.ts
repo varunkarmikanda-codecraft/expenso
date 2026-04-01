@@ -10,6 +10,21 @@ const options: Choice[] = [
 
 const { ask, choose, close } = openInteractionManager();
 
+const addFriend = async () => {
+    const name = await ask('Enter friend\'s name: ')
+    const email = await ask('Enter friend\'s email: ')
+    const phone = await ask('Enter friend\'s phone number: ')
+    const openingBalance = await ask('Enter opening balance (positive means they owe you, negative means you owe them): ');
+
+    const friend = {
+        id: Date.now().toString(),
+        name: name,
+        email: email,
+        phone: phone,
+        openingBalance: openingBalance
+    }
+}
+
 export const manageFriend = async () => {
     while(true) {
         const choice = await choose('\nWhat do you want to do?', options, false);
