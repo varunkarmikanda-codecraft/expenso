@@ -1,3 +1,4 @@
+import { getFriendsFromFile, storeFriendsInFile } from "../core/friends.storage.js";
 import type { PageOptions } from "../core/page-options.js";
 import type { iFriend } from "../models/friend.model.js";
 
@@ -15,9 +16,12 @@ export class FriendRepository {
     return this.friends;
   }
 
-  private constructor() {}
+  private constructor() {
+    this.friends = getFriendsFromFile()
+  }
   addFriend(friend: iFriend) {
     this.friends.push(friend);
+    storeFriendsInFile(this.friends);
   }
 
   findFriendByName(name: string) {
@@ -57,6 +61,7 @@ export class FriendRepository {
     const index = this.friends.findIndex(friend => friend.id === updatedFriend.id);
     if(index !== -1) {
       this.friends[index] = updatedFriend;
+      storeFriendsInFile(this.friends)
       return true;
     }
     return false;
@@ -78,6 +83,7 @@ export class FriendRepository {
     const index = this.friends.findIndex(f => f.id === friend.id);
     if(index !== -1) {
       this.friends.splice(index, 1);
+      storeFriendsInFile(this.friends)
       return true;
     }
     return false;
