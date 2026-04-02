@@ -22,7 +22,7 @@ const addFriend = async () => {
     const phone = await ask('Enter friend\'s phone number: ', { validator: phoneValidator });
     const openingBalance = await ask('Enter opening balance (positive means they owe you, negative means you owe them): ', { validator: numberValidator, defaultAnswer: '0'});
 
-    if(!name || !email || !phone) {
+    if(!name) {
         console.log("All fields required!");
         return;
     }

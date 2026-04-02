@@ -41,8 +41,8 @@ export class FriendRepository {
     const filtered = this.friends.filter((friend) => {
       return (
         friend.name.toLowerCase().includes(lowerQuery) ||
-        friend.email.toLowerCase().includes(lowerQuery) ||
-        friend.phone.toLowerCase().includes(lowerQuery)
+        friend.email?.toLowerCase().includes(lowerQuery) ||
+        friend.phone?.toLowerCase().includes(lowerQuery)
       )
     });
 
