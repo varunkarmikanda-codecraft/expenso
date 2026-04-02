@@ -1,5 +1,7 @@
 import { FriendsController } from "../controller/friends.controller.js";
 import { displayTable } from "../core/display-table.js";
+import { numberValidator } from "../core/validators/number.validator.js";
+import { emailValidator, nameValidator, phoneValidator, requiredValidator } from "../core/validators/string.validator.js";
 import { openInteractionManager, type Choice } from "./interaction-manager.js";
 
 const options: Choice[] = [
@@ -15,10 +17,10 @@ const { ask, choose, close } = openInteractionManager();
 const friendController = new FriendsController()
 
 const addFriend = async () => {
-    const name = await ask('Enter friend\'s name: ')
-    const email = await ask('Enter friend\'s email: ')
-    const phone = await ask('Enter friend\'s phone number: ')
-    const openingBalance = await ask('Enter opening balance (positive means they owe you, negative means you owe them): ');
+    const name = await ask('Enter friend\'s name: ', { validator: nameValidator });
+    const email = await ask('Enter friend\'s email: ', { validator: emailValidator });
+    const phone = await ask('Enter friend\'s phone number: ', { validator: phoneValidator });
+    const openingBalance = await ask('Enter opening balance (positive means they owe you, negative means you owe them): ', { validator: numberValidator, defaultAnswer: '0'});
 
     if(!name || !email || !phone) {
         console.log("All fields required!");
@@ -37,7 +39,7 @@ const addFriend = async () => {
 }
 
 const searchFriend = async () => {
-    const query = await ask('Enter search query: ');
+    const query = await ask('Enter search query: ', { validator: requiredValidator });
 
     if(!query) {
         console.log("Enter to search")
@@ -60,7 +62,7 @@ const updateFriend = async () => {
         { label: "Balance", value: "4"},
     ];
 
-    const name = await ask('Enter the name of the friend to update: ');
+    const name = await ask('Enter the name of the friend to update: ', { validator: nameValidator });
     if(!name) {
         console.log('Please enter a name')
         return;
@@ -77,34 +79,32 @@ const updateFriend = async () => {
 
     switch(choice?.value) {
         case '1': 
-            const updatedName = await ask(`Enter new name: (current: ${friend.name}) `);
+            const updatedName = await ask(`Enter new name: (current: ${friend.name}) `, { validator: nameValidator, defaultAnswer: friend.name });
             if(updatedName) friend.name = updatedName;
-            friendController.updateFriends(friend);
+            
             break
         case '2':
-            const updatedEmail = await ask(`Enter new email: (current: ${friend.email}) `);
+            const updatedEmail = await ask(`Enter new email: (current: ${friend.email}) `, { validator: emailValidator, defaultAnswer: friend.email });
             if(updatedEmail) friend.email = updatedEmail;
-            friendController.updateFriends(friend);
             break;
         case '3':
-            const updatedPhone = await ask(`Enter new phone number: (current: ${friend.phone}) `);
+            const updatedPhone = await ask(`Enter new phone number: (current: ${friend.phone}) `, { validator: phoneValidator, defaultAnswer: friend.phone });
             if(updatedPhone) friend.phone = updatedPhone;
-            friendController.updateFriends(friend);
             break;
         case '4':
-            const updatedBalance = await ask(`Enter new balance: (current: ${friend.balance}) `);
+            const updatedBalance = await ask(`Enter new balance: (current: ${friend.balance}) `, { validator: numberValidator, defaultAnswer: 'friend.balance' });
             if(updatedBalance) friend.balance = Number(updatedBalance);
-            friendController.updateFriends(friend);
             break;
         case '5':
             console.log('Exit update');
             break;
     }
+    friendController.updateFriends(friend);
 }
 
 const removeFriend = async () => {
 
-    const name = await ask('Enter the name of the friend to update: ');
+    const name = await ask('Enter the name of the friend to update: ', { validator: nameValidator });
     if (!name) {
         console.log('Please enter a name')
         return;
