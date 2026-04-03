@@ -20,9 +20,28 @@ const { ask, choose, close } = openInteractionManager();
 const friendController = new FriendsController()
 
 const addFriend = async () => {
-    const name = await ask('Enter friend\'s name: ', { validator: nameValidator });
-    const email = await ask('Enter friend\'s email: ', { validator: optional(emailValidator) });
-    const phone = await ask('Enter friend\'s phone number: ', { validator: optional(phoneValidator) });
+    const name = await ask('Enter friend\'s name: ', { validator: (input) => {
+        const name = input.trim();
+        const validName = nameValidator(name);
+        if(validName !== true) return validName;
+
+        if (friendController.checkNameExists(name)) return "Friend name already exists. Please enter a different name."
+        return true;
+    }});
+    const email = await ask('Enter friend\'s email: ', { validator: optional((input) => {
+        const email = input.trim();
+        const validEmail = emailValidator(email);
+        if(validEmail !== true) return validEmail;
+        if (friendController.checkEmailExists(email)) return "Friend email already exists. Please enter a different email."
+        return true;
+    })});
+    const phone = await ask('Enter friend\'s phone number: ', { validator: optional((input) => {
+        const phone = input.trim();
+        const validPhone = phoneValidator(phone);
+        if (validPhone !== true) return validPhone;
+        if (friendController.checkPhoneExists(phone)) return "Friend phone number already exists. Please enter a different phone number."
+        return true;
+    })});
     const openingBalance = await ask('Enter opening balance (positive means they owe you, negative means you owe them): ', { validator: numberValidator, defaultAnswer: '0'});
 
     if(!name) {
