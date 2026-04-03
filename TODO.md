@@ -5,10 +5,10 @@
 ### User Module
 
 ### Connection Module
-- [ ] ADD FRIEND
+- [X] ADD FRIEND
   - [X] Make Email field optional
   - [X] Make Phone field optional
-  - [ ] When there exist a user with same name or email or phone just retake input of the field that exist and not all the fields
+  - [X] When there exist a user with same name or email or phone just retake input of the field that exist and not all the fields
 
 - [ ] SEARCH FRIEND
   - [ ] Create a custom table rather tha using console.table
