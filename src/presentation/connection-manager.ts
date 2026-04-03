@@ -2,7 +2,10 @@ import { FriendsController } from "../controller/friends.controller.js";
 import { displayTable } from "../core/display-table.js";
 import { numberValidator } from "../core/validators/number.validator.js";
 import { emailValidator, nameValidator, phoneValidator, requiredValidator } from "../core/validators/string.validator.js";
+import type { ValidatorFn } from "../core/validators/validator.types.js";
 import { openInteractionManager, type Choice } from "./interaction-manager.js";
+
+const optional = (validator: ValidatorFn) => (input: string) => !input.trim() || validator(input);
 
 const options: Choice[] = [
     { label: 'Add friend', value: '1'},
@@ -18,11 +21,11 @@ const friendController = new FriendsController()
 
 const addFriend = async () => {
     const name = await ask('Enter friend\'s name: ', { validator: nameValidator });
-    const email = await ask('Enter friend\'s email: ', { validator: emailValidator });
-    const phone = await ask('Enter friend\'s phone number: ', { validator: phoneValidator });
+    const email = await ask('Enter friend\'s email: ', { validator: optional(emailValidator) });
+    const phone = await ask('Enter friend\'s phone number: ', { validator: optional(phoneValidator) });
     const openingBalance = await ask('Enter opening balance (positive means they owe you, negative means you owe them): ', { validator: numberValidator, defaultAnswer: '0'});
 
-    if(!name || !email || !phone) {
+    if(!name) {
         console.log("All fields required!");
         return;
     }
