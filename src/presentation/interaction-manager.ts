@@ -21,9 +21,12 @@ export const openInteractionManager = () => {
         const { defaultAnswer, validator } = options ?? {};
         return new Promise((resolve) => {
             rl.question(defaultAnswer ? `${question} (${defaultAnswer}) ` : `${question} `, (answer: string) => {
-                if(validator && !validator(answer)) {
-                    console.log(`Invalid input. Please try again!`);
-                    return resolve(ask(question, { defaultAnswer: defaultAnswer, validator: validator }));
+                if(validator) {
+                    const ValidationResult = validator(answer);
+                    if(typeof ValidationResult === 'string') {
+                        console.log(`${ValidationResult}`);
+                        return resolve(ask(question, { defaultAnswer: defaultAnswer, validator: validator }))
+                    }
                 }
                 resolve(answer || defaultAnswer);
             })
@@ -40,7 +43,10 @@ export const openInteractionManager = () => {
                 if(!optional && input.trim() === "") {
                     return true;
                 }
-                return choices.some(choice => choice.value === input);
+                if(!choices.some(choice => choice.value === input)) {
+                    return 'Invlid choice! Try again with a valid choice.'
+                }
+                return true;
             }
         })
         return choices.find(c => c.value === choice)
