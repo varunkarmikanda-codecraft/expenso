@@ -1,57 +1,47 @@
-import type { PageOptions } from "../core/page-options.js";
 import type { iFriend } from "../models/friend.model.js";
 import { FriendRepository } from "../repository/friends.repository.js";
+
+const repository = FriendRepository.getInstance();
 
 export class FriendsController{
     getFriends() {
         return FriendRepository.getInstance().f;
     }
-    
-    checkEmailExists(email:string){
-        return false;
-    }
-
-    checkPhoneExists(phone:string){
-        return false;
-    }
 
     addFriend(friend:iFriend){
-        if(!FriendRepository.getInstance()){
-            return { success:false }
-        }
-        console.log('Adding friend to database...',friend)
-        FriendRepository.getInstance().addFriend(friend);
+        console.log('Attempting to add a friend...', friend)
+        repository.addFriend(friend);
     }
 
     searchFriends(query: string) {
         console.log('Search for friend in database...');
-        return FriendRepository.getInstance().searchFriends(query, { offset: 0, limit: FriendRepository.getInstance().f.length})
+        return repository.searchFriends(query, { offset: 0, limit: repository.f.length})
     }
 
     findFriend(name: string) {
-        if(!FriendRepository.getInstance()) {
+        if(!repository) {
             return undefined;
         }
-        return FriendRepository.getInstance().findFriendByName(name)
+        return repository.findFriendByName(name)
     }
 
     updateFriends(friend: iFriend) {
-        if(!FriendRepository.getInstance()) {
+        if(!repository) {
             return { success: false };
         }
         console.log(`Updated ${friend.name}...`)
-        return FriendRepository.getInstance().updateFriends(friend);
+        return repository.updateFriends(friend);
     }
     
     removeFriends(name: string) {
-        if(!FriendRepository.getInstance()) {
+        if(!repository) {
             return { success: false };
         }
         console.log(`Deleted ${name}...`)
-        FriendRepository.getInstance().removeFriends(name);
+        repository.removeFriends(name);
     }
 
     allFriends() {
-        return FriendRepository.getInstance().f;
+        return repository.f;
     }
 }
