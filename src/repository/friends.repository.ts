@@ -1,3 +1,4 @@
+import { ConflictError } from "../core/errors/conflict.error.js";
 import { getFriendsFromFile, storeFriendsInFile } from "../core/friends.storage.js";
 import type { PageOptions } from "../core/page-options.js";
 import type { iFriend } from "../models/friend.model.js";
@@ -19,10 +20,6 @@ export class FriendRepository {
   private constructor() {
     this.friends = getFriendsFromFile()
   }
-  addFriend(friend: iFriend) {
-    this.friends.push(friend);
-    storeFriendsInFile(this.friends);
-  }
 
   findFriendByName(name: string) {
     return this.friends.find((friend) => friend.name === name);
@@ -34,6 +31,20 @@ export class FriendRepository {
 
   findFriendByPhone(phone: string) {
     return this.friends.find((friend) => friend.phone === phone);
+  }
+
+  addFriend(friend: iFriend) {
+    if(this.findFriendByName(friend.name)) {
+      throw new ConflictError('Friend with name exists.', 'name');
+    }
+    if(friend.email && this.findFriendByEmail(friend.email)) {
+      throw new ConflictError('Friend with this mail exists.', 'email');
+    }
+    if(friend.phone && this.findFriendByPhone(friend.phone)) {
+      throw new ConflictError('Friend with this phone number exists.', 'phone');
+    }
+    this.friends.push(friend);
+    storeFriendsInFile(this.friends);
   }
 
   searchFriends(query: string, pageOption?: PageOptions) {

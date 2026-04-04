@@ -27,11 +27,11 @@
   - [ ] Ask for a confirmation before deleting directly
   - [ ] Implement soft delete
 
-- [ ] ERROR
-  - [ ] Error handling in the controllers to convey the message to the presentation layer
-  - [ ] Database errors (In our case its files)
-    - [ ] Create a Conflict error class that extends the Error class (Basically create a custom error class)
-    - [ ] Then handle the errors in the controllers and pass the info to the presentation layer to convey the user
+- [X] ERROR
+  - [X] Error handling in the repository to convey the message to the presentation layer
+  - [X] Database errors (In our case its files)
+    - [X] Create a Conflict error class that extends the Error class (Basically create a custom error class)
+    - [X] Then handle the errors in the repository and pass the info to the presentation layer to convey the user
 
 - [ ] FILE STORAGE
   - [ ] Read and write to the file optimizations
