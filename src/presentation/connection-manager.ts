@@ -91,7 +91,7 @@ const updateFriend = async () => {
         return
     }
 
-    const indexedFriendsList = matchedResult.data.map((friend, index) =>( {
+    const indexedFriendsList = matchedResult.data.map((friend, index) => ({
         ...friend, index: index + 1 
     }))
     displayTable(indexedFriendsList, { index: 0, id: "", name: "", email: "", phone: "", balance: 0 })
@@ -125,15 +125,45 @@ const updateFriend = async () => {
 
 const removeFriend = async () => {
 
-    const name = await ask('Enter the name of the friend to update: ', { validator: nameValidator });
-    if (!name) {
-        console.log('Please enter a name')
+    const query = await ask("Enter search query for friend to remove: ", { validator: requiredValidator });
+    if(!query) return;
+
+    const matchedResult = friendController.searchFriends(query);
+
+    if(!matchedResult.data || matchedResult.data.length === 0) {
+        console.log('No data matched!')
         return;
     }
 
-    friendController.removeFriends(name);
+    const indexedFriendsList = matchedResult.data.map((friend, index) => ({
+        ...friend, index: index + 1
+    }))
 
+    displayTable(indexedFriendsList, { index: 0, id: "", name: "", email: "", phone: "", balance: 0 })
+
+    const index = await ask('Enter the index of the friend you want to delete: ', { validator: rangeValidator(1, matchedResult.data.length)})
+    if(!index) return
+
+    const friend = matchedResult.data[Number(index) - 1];
+    if(!friend) return;
+
+    displayTable([friend], { id: "", name: "", email: "", phone: "", balance: 0 })
+    
+    const toDelete = await ask("Are your sure you want to delete your friend? (yes/no)", { defaultAnswer: "yes" });
+
+    if(!toDelete) return;
+
+    const deleteResponses = ['yes', 'y'];
+    const canDelete = deleteResponses.includes(toDelete?.toLowerCase());
+    
+    if(canDelete) {
+        friendController.removeFriends(friend?.id);
+        console.log('Deleted');
+        return
+    }
+    console.log('Delete cancelled')
 }
+    
 
 const allFriends = async () => {
     const allFriends = friendController.allFriends();

@@ -21,6 +21,10 @@ export class FriendRepository {
     this.friends = getFriendsFromFile()
   }
 
+  findFriendByID(id: string) {
+    return this.friends.find((friend) => friend.id === id);
+  }
+
   findFriendByName(name: string) {
     return this.friends.find((friend) => friend.name === name);
   }
@@ -78,8 +82,8 @@ export class FriendRepository {
     return false;
   }
 
-  removeFriends(name: string) {
-    const friend = this.findFriendByName(name);
+  removeFriends(id: string) {
+    const friend = this.findFriendByID(id);
 
     if(!friend) {
       console.log('Friend not found!');
