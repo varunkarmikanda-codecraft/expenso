@@ -6,3 +6,11 @@ export const numberValidator: ValidatorFn = (input: string): ValidationResult =>
   }
   return true;
 }
+
+export const rangeValidator = (min: number, max: number): ValidatorFn => (input: string) => {
+  const number = Number(input);
+  if(number < min || number > max) {
+    return min !== max ? `Please choose an number between ${min} and ${max}.` : `Please choose an number ${ min }`;
+  }
+  return true;
+}
