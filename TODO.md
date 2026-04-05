@@ -11,7 +11,7 @@
   - [X] When there exist a user with same name or email or phone just retake input of the field that exist and not all the fields
 
 - [ ] SEARCH FRIEND
-  - [ ] Create a custom table rather tha using console.table
+  - [X] Create a custom table rather tha using console.table
   - [ ] Limit the display of the table to 5 users
   - [ ] Display the total number of users and the total number of pages available
   - [ ] Should be able to move between the pages using arrow keys

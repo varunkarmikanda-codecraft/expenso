@@ -61,7 +61,7 @@ export class FriendRepository {
     return {
       data: filtered.slice(
         pageOption?.offset || 0,
-        (pageOption?.offset || 0) + (pageOption?.limit || 5),
+        (pageOption?.offset || 0) + (pageOption?.limit || filtered.length),
       ),
       matched: filtered.length,
       total: this.friends.length,
