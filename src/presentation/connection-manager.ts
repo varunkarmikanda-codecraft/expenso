@@ -78,7 +78,7 @@ const searchFriend = async () => {
         console.log('No data matched!')
         return
     }
-    displayTable(result.data)
+    displayTable(result.data, { id: "", name: "", email: "", phone: "", balance: 0})
 }
 
 const updateFriend = async () => {
@@ -149,7 +149,7 @@ const allFriends = async () => {
         return;
     }
 
-    displayTable(allFriends);
+    displayTable(allFriends, { id: "", name: "", email: "", phone: "", balance: 0 });
 }
 
 export const manageFriend = async () => {
