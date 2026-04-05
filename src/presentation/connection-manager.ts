@@ -1,7 +1,7 @@
 import { FriendsController } from "../controller/friends.controller.js";
 import { displayTable } from "../core/display-table.js";
 import { ConflictError } from "../core/errors/conflict.error.js";
-import { numberValidator } from "../core/validators/number.validator.js";
+import { numberValidator, rangeValidator } from "../core/validators/number.validator.js";
 import { emailValidator, nameValidator, phoneValidator, requiredValidator } from "../core/validators/string.validator.js";
 import type { ValidatorFn } from "../core/validators/validator.types.js";
 import { openInteractionManager, type Choice } from "./interaction-manager.js";
@@ -68,65 +68,59 @@ const addFriend = async () => {
 const searchFriend = async () => {
     const query = await ask('Enter search query: ', { validator: requiredValidator });
 
-    if (!query) {
-        console.log("Enter to search")
-        return
-    }
+    if (!query) return;
 
-    const result = friendController.searchFriends(query);
-    if (!result.data || result.data.length === 0) {
+    const matchedResult = friendController.searchFriends(query);
+    if (!matchedResult.data || matchedResult.data.length === 0) {
         console.log('No data matched!')
         return
     }
-    displayTable(result.data, { id: "", name: "", email: "", phone: "", balance: 0})
+    displayTable(matchedResult.data, { id: "", name: "", email: "", phone: "", balance: 0})
 }
 
 const updateFriend = async () => {
-    const updateOptions: Choice[] = [
-        { label: "Name", value: "1" },
-        { label: "Email", value: "2" },
-        { label: "Phone number", value: "3" },
-        { label: "Balance", value: "4" },
-    ];
 
-    const name = await ask('Enter the name of the friend to update: ', { validator: nameValidator });
-    if (!name) {
-        console.log('Please enter a name')
-        return;
-    }
-    const friend = friendController.findFriend(name);
+    const query = await ask("Enter search query for friend to update: ", { validator: requiredValidator });
 
-    if (!friend) {
-        console.log('Not found!')
-        return;
+    if (!query) return
+
+    const matchedResult = friendController.searchFriends(query);
+    
+    if (!matchedResult.data || matchedResult.data.length === 0) {
+        console.log('No data matched!')
+        return
     }
 
+    const indexedFriendsList = matchedResult.data.map((friend, index) =>( {
+        ...friend, index: index + 1 
+    }))
+    displayTable(indexedFriendsList, { index: 0, id: "", name: "", email: "", phone: "", balance: 0 })
 
-    const choice = await choose('\nWhat do you want to update? ', updateOptions, false);
+    const index = await ask('Enter the index of the friend you want to update: ', { validator: rangeValidator(1, matchedResult.data.length)});
 
-    switch (choice?.value) {
-        case '1':
-            const updatedName = await ask(`Enter new name: (current: ${friend.name}) `, { validator: nameValidator, defaultAnswer: friend.name });
-            if (updatedName) friend.name = updatedName;
+    if(!index) return;
 
-            break
-        case '2':
-            const updatedEmail = await ask(`Enter new email: (current: ${friend.email}) `, { validator: emailValidator, defaultAnswer: friend.email });
-            if (updatedEmail) friend.email = updatedEmail;
-            break;
-        case '3':
-            const updatedPhone = await ask(`Enter new phone number: (current: ${friend.phone}) `, { validator: phoneValidator, defaultAnswer: friend.phone });
-            if (updatedPhone) friend.phone = updatedPhone;
-            break;
-        case '4':
-            const updatedBalance = await ask(`Enter new balance: (current: ${friend.balance}) `, { validator: numberValidator, defaultAnswer: 'friend.balance' });
-            if (updatedBalance) friend.balance = Number(updatedBalance);
-            break;
-        case '5':
-            console.log('Exit update');
-            break;
-    }
-    friendController.updateFriends(friend);
+    const friend = matchedResult.data[Number(index) - 1];
+    if(!friend) return
+
+        const updatedName = await ask(`Enter the new name (Current : ${friend?.name})`, { validator: optional(nameValidator), defaultAnswer: friend?.name });
+        const updatedEmail = await ask(`Enter the new email (Current : ${friend?.email})`, { validator: optional(emailValidator), defaultAnswer: friend?.email });
+        const updatedPhone = await ask(`Enter the new phone number (Current : ${friend?.phone})`, { validator: optional(phoneValidator), defaultAnswer: friend?.phone });
+        const updatedBalance = await ask(`Enter the new balance (Current : ${friend?.balance})`, { validator: optional(numberValidator), defaultAnswer: String(friend?.balance) });
+
+        if(updatedName === friend.name && updatedEmail === friend.email && updatedPhone === friend.phone && updatedBalance === String(friend.balance)) {
+            console.log("No fields of the friend was updated!")
+            return
+        }
+
+        if(updatedName) friend.name = updatedName;
+        if(updatedEmail) friend.email = updatedEmail;
+        if(updatedPhone) friend.phone = updatedPhone;
+        if(updatedBalance) friend.balance = Number(updatedBalance);
+
+        friendController.updateFriends(friend)
+
+    
 }
 
 const removeFriend = async () => {
