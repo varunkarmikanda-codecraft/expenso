@@ -40,15 +40,7 @@ export class FriendRepository {
   }
 
   async addFriend(friend: iFriend) {
-    if(this.findFriendByName(friend.name)) {
-      throw new ConflictError('Friend with name exists.', 'name');
-    }
-    if(friend.email && this.findFriendByEmail(friend.email)) {
-      throw new ConflictError('Friend with this mail exists.', 'email');
-    }
-    if(friend.phone && this.findFriendByPhone(friend.phone)) {
-      throw new ConflictError('Friend with this phone number exists.', 'phone');
-    }
+    console.log('Adding friend...')
     this.friends.push(friend);
     await this.db.save();
   }

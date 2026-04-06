@@ -1,3 +1,4 @@
+import { ExistsError } from "../core/errors/exists.error.js";
 import type { iFriend } from "../models/friend.model.js";
 import { FriendRepository } from "../repository/friends.repository.js";
 
@@ -9,7 +10,20 @@ export class FriendsController {
   }
 
   async addFriend(friend: iFriend) {
+    const conflictKeys = [];
+    if(repository.findFriendByName(friend.name)) {
+        conflictKeys.push('name');
+    }
+    if(friend.email && repository.findFriendByEmail(friend.email)) {
+        conflictKeys.push('email');
+    }
+    if(friend.phone && repository.findFriendByPhone(friend.phone)) {
+        conflictKeys.push('phone');
+    }
     console.log("Attempting to add a friend...", friend);
+    if(conflictKeys.length > 0) {
+        throw new ExistsError('Friend data conflicts with existing friend', conflictKeys);
+    }
     await repository.addFriend(friend);
   }
 

@@ -1,9 +1,11 @@
 import { FriendsController } from "../controller/friends.controller.js";
 import { displayTable } from "../core/display-table.js";
 import { ConflictError } from "../core/errors/conflict.error.js";
+import { ExistsError } from "../core/errors/exists.error.js";
 import { numberValidator, rangeValidator } from "../core/validators/number.validator.js";
 import { emailValidator, nameValidator, phoneValidator, requiredValidator } from "../core/validators/string.validator.js";
 import type { ValidatorFn } from "../core/validators/validator.types.js";
+import type { iFriend } from "../models/friend.model.js";
 import { openInteractionManager, type Choice } from "./interaction-manager.js";
 
 const optional = (validator: ValidatorFn) => (input: string) => !input.trim() || validator(input);
@@ -18,49 +20,82 @@ const options: Choice[] = [
 ];
 
 const { ask, choose, close } = openInteractionManager();
-const friendController = new FriendsController()
+const friendController = new FriendsController();
+
+const showFriendForm = (initialData?: iFriend) => {
+
+    const isUpdate = Boolean(initialData)
+
+    const friendData = {
+        name: initialData?.name ||  "",
+        email: initialData?.email || null,
+        phone: initialData?.phone || null,
+        balance: initialData?.balance || 0
+    }
+
+    const fill = async () => {
+        friendData.name = await ask(`Enter friend\'s name: ${friendData.name ? `(${friendData.name})` : ''}`, { validator: isUpdate ?  optional(nameValidator) : nameValidator, defaultAnswer: friendData.name });
+        const email = await ask(`Enter friend\'s email: ${friendData.email ? `(${friendData.email})` : ''}`, { validator: optional(emailValidator), defaultAnswer: friendData.email || null });
+        friendData.email = email ? email : null;
+        const phone = await ask(`Enter friend\'s phone number: ${friendData.phone ? `(${friendData.phone})` : ''}`, { validator: optional(phoneValidator), defaultAnswer: friendData.phone || null });
+        friendData.phone = phone ? phone : null;
+        friendData.balance = parseInt(await ask(`Enter opening balance (positive means they owe you, negative means you owe them): ${friendData.balance ? `(${friendData.balance})` : ''}`, { validator: numberValidator, defaultAnswer: '0' }));
+    }
+
+    const fixConflict = async (conflictKeys: string[]) => {
+        for(const key of conflictKeys) {
+            console.log(`Conflict found on "${key}"`);
+            if(key === 'name') {
+                friendData.name = await ask(`${friendData.name} already exists. Please enter a different name: `, { validator: nameValidator });
+            }
+            if(key === 'email') {
+                friendData.email = await ask(`${friendData.email} already exists. Please enter a different email: `, { validator: emailValidator });
+            }
+            if(key === 'phone') {
+                friendData.phone = await ask(`${friendData.phone} already exists. Please enter a different phone: `, { validator: phoneValidator });
+            }
+        }
+    }
+
+    const values = (): iFriend => {
+        return {
+            id: Date.now().toString(),
+            name: friendData.name,
+            email: friendData.email,
+            phone: friendData.phone,
+            balance: Number(friendData.balance) || 0
+        }
+    }
+
+    return {
+        fill,
+        fixConflict,
+        values
+    }
+}
 
 const addFriend = async () => {
-    let name = await ask('Enter friend\'s name: ', { validator: nameValidator });
-    let email = await ask('Enter friend\'s email: ', { validator: optional(emailValidator) });
-    let phone = await ask('Enter friend\'s phone number: ', { validator: optional(phoneValidator) });
-    const openingBalance = await ask('Enter opening balance (positive means they owe you, negative means you owe them): ', { validator: numberValidator, defaultAnswer: '0' });
 
-    if (!name) {
-        console.log("Name field required!");
-        return;
+    const form = showFriendForm();
+    await form.fill()
+
+    if(!form.values().name) {
+        console.log('Name is required')
     }
-    
+
     while(true) {
         try {
-            await friendController.addFriend({
-                id: Date.now().toString(),
-                name: name!,
-                email: email,
-                phone: phone,
-                balance: Number(openingBalance) || 0
-            })
+            await friendController.addFriend(form.values());
+            console.log("Friend added successfully");
             return
-        } catch (error) {
-            if (error instanceof ConflictError) {
-                console.log(`${error.name}: ${error.conflictError} | ${error.message}`);
-                if(error.conflictError === 'name') {
-                    name = await ask('Enter friend\'s name: ', { validator: nameValidator });
-                    continue;
-                }
-                if (error.conflictError === 'email') {
-                    email = await ask('Enter friend\'s email: ', { validator: optional(emailValidator) });
-                    continue;
-                }
-                if (error.conflictError === 'phone') {
-                    phone = await ask('Enter friend\'s phone number: ', { validator: optional(phoneValidator) });
-                    continue;
-                }
-            } else if (error instanceof Error) {
-                console.log(error.message);
-            } else {
-                console.log('Unknown error please try again!')
+        } catch(error) {
+            if(error instanceof ExistsError) {
+                console.log(`Error: ${error.message}`);
+                await form.fixConflict(error.conflictKeys);
+                continue;
             }
+            console.log('Unknown error please try again!')
+            break;
         }
     }
 }
@@ -103,23 +138,29 @@ const updateFriend = async () => {
     const friend = matchedResult.data[Number(index) - 1];
     if(!friend) return
 
-        const updatedName = await ask(`Enter the new name (Current : ${friend?.name})`, { validator: optional(nameValidator), defaultAnswer: friend?.name });
-        const updatedEmail = await ask(`Enter the new email (Current : ${friend?.email})`, { validator: optional(emailValidator), defaultAnswer: friend?.email });
-        const updatedPhone = await ask(`Enter the new phone number (Current : ${friend?.phone})`, { validator: optional(phoneValidator), defaultAnswer: friend?.phone });
-        const updatedBalance = await ask(`Enter the new balance (Current : ${friend?.balance})`, { validator: optional(numberValidator), defaultAnswer: String(friend?.balance) });
+    const form = showFriendForm(friend);
+    await form.fill();
 
-        if(updatedName === friend.name && updatedEmail === friend.email && updatedPhone === friend.phone && updatedBalance === String(friend.balance)) {
-            console.log("No fields of the friend was updated!")
+    if(friend === form.values()) {
+        console.log("No field was updated!")
+        return;
+    }
+
+    while(true) {
+        try {
+            await friendController.updateFriends(form.values());
+            console.log(`Friend updated successfully`)
             return
+        } catch(error) {
+            if(error instanceof ExistsError) {
+                console.log(`Error: ${error.message}`);
+                await form.fixConflict(error.conflictKeys);
+                continue
+            }
+            console.log('Unknown error please try again!')
+            break;
         }
-
-        if(updatedName) friend.name = updatedName;
-        if(updatedEmail) friend.email = updatedEmail;
-        if(updatedPhone) friend.phone = updatedPhone;
-        if(updatedBalance) friend.balance = Number(updatedBalance);
-
-        friendController.updateFriends(friend)
-
+    }
     
 }
 

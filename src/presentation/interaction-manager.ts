@@ -4,8 +4,8 @@ import type { ValidatorFn } from '../core/validators/validator.types.js';
 
 
 export interface AskOptions {
-    defaultAnswer?: string | undefined;
-    validator?: ValidatorFn | undefined;
+    defaultAnswer?: string | null;
+    validator?: ValidatorFn;
 }
 
 export interface Choice {
@@ -17,7 +17,7 @@ export const openInteractionManager = () => {
 
     const rl = readline.createInterface({ input, output });
     
-    const ask = (question: string, options?: AskOptions): Promise<string | undefined> => {
+    const ask = (question: string, options?: AskOptions): Promise<string> => {
         const { defaultAnswer, validator } = options ?? {};
         return new Promise((resolve) => {
             rl.question(defaultAnswer ? `${question} (${defaultAnswer}) ` : `${question} `, (answer: string) => {
@@ -25,10 +25,10 @@ export const openInteractionManager = () => {
                     const ValidationResult = validator(answer);
                     if(typeof ValidationResult === 'string') {
                         console.log(`${ValidationResult}`);
-                        return resolve(ask(question, { defaultAnswer: defaultAnswer, validator: validator }))
+                        return resolve(ask(question, options))
                     }
                 }
-                resolve(answer || defaultAnswer);
+                resolve(answer || defaultAnswer || "");
             })
         })
     }
