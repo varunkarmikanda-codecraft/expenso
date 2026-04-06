@@ -9,6 +9,7 @@
   - [X] Make Email field optional
   - [X] Make Phone field optional
   - [X] When there exist a user with same name or email or phone just retake input of the field that exist and not all the fields
+  - [ ] Change the email and phone if empty instead of undefined make the field null or empty string
 
 - [ ] SEARCH FRIEND
   - [X] Create a custom table rather tha using console.table

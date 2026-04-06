@@ -1,11 +1,13 @@
 import { ConflictError } from "../core/errors/conflict.error.js";
-import { getFriendsFromFile, storeFriendsInFile } from "../core/friends.storage.js";
 import type { PageOptions } from "../core/page-options.js";
 import type { iFriend } from "../models/friend.model.js";
+import { AppDBManager } from "./db-manager.js";
 
 export class FriendRepository {
   private static instance: FriendRepository;
   private friends: iFriend[] = [];
+  private db = AppDBManager.getInstance().getDB();
+
   static getInstance() {
     if (!FriendRepository.instance) {
       FriendRepository.instance = new FriendRepository();
@@ -18,7 +20,7 @@ export class FriendRepository {
   }
 
   private constructor() {
-    this.friends = getFriendsFromFile()
+    this.friends = this.db.table("friends") as iFriend[];
   }
 
   findFriendByID(id: string) {
@@ -37,7 +39,7 @@ export class FriendRepository {
     return this.friends.find((friend) => friend.phone === phone);
   }
 
-  addFriend(friend: iFriend) {
+  async addFriend(friend: iFriend) {
     if(this.findFriendByName(friend.name)) {
       throw new ConflictError('Friend with name exists.', 'name');
     }
@@ -48,7 +50,7 @@ export class FriendRepository {
       throw new ConflictError('Friend with this phone number exists.', 'phone');
     }
     this.friends.push(friend);
-    storeFriendsInFile(this.friends);
+    await this.db.save();
   }
 
   searchFriends(query: string, pageOption?: PageOptions) {
@@ -72,17 +74,17 @@ export class FriendRepository {
     };
   }
 
-  updateFriends(updatedFriend: iFriend) {
-    const index = this.friends.findIndex(friend => friend.id === updatedFriend.id);
-    if(index !== -1) {
+  async updateFriends(updatedFriend: iFriend) {
+    const index = this.friends.findIndex((friend) => friend.id === updatedFriend.id);
+    if (index !== -1) {
       this.friends[index] = updatedFriend;
-      storeFriendsInFile(this.friends)
+      await this.db.save();
       return true;
     }
     return false;
   }
 
-  removeFriends(id: string) {
+  async removeFriends(id: string) {
     const friend = this.findFriendByID(id);
 
     if(!friend) {
@@ -95,10 +97,10 @@ export class FriendRepository {
       return;
     }
 
-    const index = this.friends.findIndex(f => f.id === friend.id);
+    const index = this.friends.findIndex((f) => f.id === friend.id);
     if(index !== -1) {
       this.friends.splice(index, 1);
-      storeFriendsInFile(this.friends)
+      await this.db.save();
       return true;
     }
     return false;

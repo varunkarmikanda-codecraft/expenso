@@ -3,45 +3,48 @@ import { FriendRepository } from "../repository/friends.repository.js";
 
 const repository = FriendRepository.getInstance();
 
-export class FriendsController{
-    getFriends() {
-        return FriendRepository.getInstance().f;
-    }
+export class FriendsController {
+  getFriends() {
+    return FriendRepository.getInstance().f;
+  }
 
-    addFriend(friend:iFriend){
-        console.log('Attempting to add a friend...', friend)
-        repository.addFriend(friend);
-    }
+  async addFriend(friend: iFriend) {
+    console.log("Attempting to add a friend...", friend);
+    await repository.addFriend(friend);
+  }
 
-    searchFriends(query: string) {
-        console.log('Search for friend in database...');
-        return repository.searchFriends(query, { offset: 0, limit: repository.f.length})
-    }
+  searchFriends(query: string) {
+    console.log("Search for friend in database...");
+    return repository.searchFriends(query, {
+      offset: 0,
+      limit: repository.f.length,
+    });
+  }
 
-    findFriend(name: string) {
-        if(!repository) {
-            return undefined;
-        }
-        return repository.findFriendByName(name)
+  findFriend(name: string) {
+    if (!repository) {
+      return undefined;
     }
+    return repository.findFriendByName(name);
+  }
 
-    updateFriends(friend: iFriend) {
-        if(!repository) {
-            return { success: false };
-        }
-        console.log(`Updated ${friend.name}...`)
-        return repository.updateFriends(friend);
+  async updateFriends(friend: iFriend) {
+    if (!repository) {
+      return { success: false };
     }
-    
-    removeFriends(name: string) {
-        if(!repository) {
-            return { success: false };
-        }
-        console.log(`Deleted ${name}...`)
-        repository.removeFriends(name);
-    }
+    console.log(`Updated ${friend.name}...`);
+    return await repository.updateFriends(friend);
+  }
 
-    allFriends() {
-        return repository.f;
+  async removeFriends(name: string) {
+    if (!repository) {
+      return { success: false };
     }
+    console.log(`Deleted ${name}...`);
+    await repository.removeFriends(name);
+  }
+
+  allFriends() {
+    return repository.f;
+  }
 }
