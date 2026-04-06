@@ -33,7 +33,7 @@ const addFriend = async () => {
     
     while(true) {
         try {
-            friendController.addFriend({
+            await friendController.addFriend({
                 id: Date.now().toString(),
                 name: name!,
                 email: email,
