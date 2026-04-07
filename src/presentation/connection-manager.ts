@@ -1,6 +1,5 @@
 import { FriendsController } from "../controller/friends.controller.js";
 import { displayTable } from "../core/display-table.js";
-import { ConflictError } from "../core/errors/conflict.error.js";
 import { ExistsError } from "../core/errors/exists.error.js";
 import { numberValidator, rangeValidator } from "../core/validators/number.validator.js";
 import { emailValidator, nameValidator, phoneValidator, requiredValidator } from "../core/validators/string.validator.js";
@@ -27,6 +26,7 @@ const showFriendForm = (initialData?: iFriend) => {
     const isUpdate = Boolean(initialData)
 
     const friendData = {
+        id: initialData?.id || null,
         name: initialData?.name ||  "",
         email: initialData?.email || null,
         phone: initialData?.phone || null,
@@ -34,12 +34,12 @@ const showFriendForm = (initialData?: iFriend) => {
     }
 
     const fill = async () => {
-        friendData.name = await ask(`Enter friend\'s name: ${friendData.name ? `(${friendData.name})` : ''}`, { validator: isUpdate ?  optional(nameValidator) : nameValidator, defaultAnswer: friendData.name });
-        const email = await ask(`Enter friend\'s email: ${friendData.email ? `(${friendData.email})` : ''}`, { validator: optional(emailValidator), defaultAnswer: friendData.email || null });
+        friendData.name = await ask(`Enter friend\'s name: `, { validator: isUpdate ?  optional(nameValidator) : nameValidator, defaultAnswer: friendData.name });
+        const email = await ask(`Enter friend\'s email: `, { validator: optional(emailValidator), defaultAnswer: friendData.email });
         friendData.email = email ? email : null;
-        const phone = await ask(`Enter friend\'s phone number: ${friendData.phone ? `(${friendData.phone})` : ''}`, { validator: optional(phoneValidator), defaultAnswer: friendData.phone || null });
+        const phone = await ask(`Enter friend\'s phone number: `, { validator: optional(phoneValidator), defaultAnswer: friendData.phone });
         friendData.phone = phone ? phone : null;
-        friendData.balance = parseInt(await ask(`Enter opening balance (positive means they owe you, negative means you owe them): ${friendData.balance ? `(${friendData.balance})` : ''}`, { validator: numberValidator, defaultAnswer: '0' }));
+        friendData.balance = parseInt(await ask(`Enter opening balance (positive means they owe you, negative means you owe them): `, { validator: numberValidator, defaultAnswer: String(friendData.balance) }));
     }
 
     const fixConflict = async (conflictKeys: string[]) => {
@@ -59,7 +59,7 @@ const showFriendForm = (initialData?: iFriend) => {
 
     const values = (): iFriend => {
         return {
-            id: Date.now().toString(),
+            id: friendData.id || Date.now().toString(),
             name: friendData.name,
             email: friendData.email,
             phone: friendData.phone,
@@ -78,10 +78,6 @@ const addFriend = async () => {
 
     const form = showFriendForm();
     await form.fill()
-
-    if(!form.values().name) {
-        console.log('Name is required')
-    }
 
     while(true) {
         try {
@@ -104,6 +100,8 @@ const searchFriend = async () => {
     const query = await ask('Enter search query: ', { validator: requiredValidator });
 
     if (!query) return;
+
+    console.log("Search for friend in database...");
 
     const matchedResult = friendController.searchFriends(query);
     if (!matchedResult.data || matchedResult.data.length === 0) {
@@ -140,11 +138,6 @@ const updateFriend = async () => {
 
     const form = showFriendForm(friend);
     await form.fill();
-
-    if(friend === form.values()) {
-        console.log("No field was updated!")
-        return;
-    }
 
     while(true) {
         try {
@@ -199,7 +192,7 @@ const removeFriend = async () => {
     
     if(canDelete) {
         friendController.removeFriends(friend?.id);
-        console.log('Deleted');
+        console.log(`Deleted ${friend.name}...`);
         return
     }
     console.log('Delete cancelled')
@@ -214,6 +207,7 @@ const allFriends = async () => {
         return;
     }
 
+    console.log('All friends')
     displayTable(allFriends, { id: "", name: "", email: "", phone: "", balance: 0 });
 }
 

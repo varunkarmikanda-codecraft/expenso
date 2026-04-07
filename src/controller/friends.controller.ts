@@ -20,7 +20,6 @@ export class FriendsController {
     if(friend.phone && repository.findFriendByPhone(friend.phone)) {
         conflictKeys.push('phone');
     }
-    console.log("Attempting to add a friend...", friend);
     if(conflictKeys.length > 0) {
         throw new ExistsError('Friend data conflicts with existing friend', conflictKeys);
     }
@@ -28,7 +27,6 @@ export class FriendsController {
   }
 
   searchFriends(query: string) {
-    console.log("Search for friend in database...");
     return repository.searchFriends(query, {
       offset: 0,
       limit: repository.f.length,
@@ -43,10 +41,31 @@ export class FriendsController {
   }
 
   async updateFriends(friend: iFriend) {
-    if (!repository) {
-      return { success: false };
+    const conflictKeys = [];
+    const existingFriendData = repository.findFriendByID(friend.id);
+
+    if (!existingFriendData) {
+        throw new Error("Friend not found");
     }
-    console.log(`Updated ${friend.name}...`);
+
+    if(existingFriendData.name !== friend.name) {
+      if(repository.findFriendByName(friend.name)) {
+        conflictKeys.push('name');
+      }
+    }
+    if(existingFriendData.email !== friend.email) {
+      if(friend.email && repository.findFriendByEmail(friend.email)) {
+        conflictKeys.push('email');
+      }
+    }
+    if(existingFriendData.phone !== friend.phone) {
+      if(friend.phone && repository.findFriendByPhone(friend.phone)) {
+        conflictKeys.push('phone');
+      }
+    }
+    if(conflictKeys.length > 0) {
+      throw new ExistsError('Friend data conflicts with existing friend', conflictKeys);
+    }
     return await repository.updateFriends(friend);
   }
 
@@ -54,7 +73,6 @@ export class FriendsController {
     if (!repository) {
       return { success: false };
     }
-    console.log(`Deleted ${name}...`);
     await repository.removeFriends(name);
   }
 
