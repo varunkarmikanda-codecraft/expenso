@@ -14,9 +14,9 @@
 
 - [ ] SEARCH FRIEND
   - [X] Create a custom table rather tha using console.table
-  - [ ] Limit the display of the table to 5 users
-  - [ ] Display the total number of users and the total number of pages available
-  - [ ] Should be able to move between the pages using arrow keys
+  - [X] Limit the display of the table to 5 users
+  - [X] Display the total number of users and the total number of pages available
+  - [X] Should be able to move between the pages using arrow keys
   - [ ] Add rankings to the search vales with exact values in the top followed by starts with and then contains the query
 
 - [ ] UPDATE FRIEND
@@ -24,11 +24,13 @@
   - [X] Use the search to get the matched query value, display it and ask user what to update (Basically ask user to prompt a number corresponding to the value it wants to update)
   - [X] The updating friend must be in such a way that it should ask name, email, phone and balance if not supplied a particular value keep the existing value as default
   - [X] Use the friend form to update friend
+  - [ ] Use up and down arrows to select the friend user wants to update rather athan using the index based to improve ux
   
 - [ ] DELETE FRIEND
   - [X] Use the search to get the match values and then display the table and ask the user what to delete (Basically ask user to prompt a number corresponding to the value it wants to update)
   - [X] Ask for a confirmation before deleting directly
   - [ ] Implement soft delete
+  - [ ] Use up and down arrows to select the friend user wants to delete rather athan using the index based to improve ux
 
 - [X] ERROR
   - [X] Error handling in the repository to convey the message to the presentation layer
