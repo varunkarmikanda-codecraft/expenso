@@ -17,6 +17,7 @@
   - [ ] Limit the display of the table to 5 users
   - [ ] Display the total number of users and the total number of pages available
   - [ ] Should be able to move between the pages using arrow keys
+  - [ ] Add rankings to the search vales with exact values in the top followed by starts with and then contains the query
 
 - [ ] UPDATE FRIEND
   - [X] Remove the currently using switch case to ask for the fields

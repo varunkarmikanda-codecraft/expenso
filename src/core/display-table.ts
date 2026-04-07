@@ -24,6 +24,6 @@ export const displayTable = <T extends object>(data: T[], model: T) => {
 
     console.log(divider)
 
-    console.log(`Page: 1 of ${Math.ceil(data.length / 5)}`)
+    // console.log(`Page: 1 of ${Math.ceil(data.length / 5)}`)
     console.log(`Total friends: ${data.length}`)
 }
