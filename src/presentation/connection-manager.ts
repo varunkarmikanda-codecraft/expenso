@@ -1,6 +1,7 @@
 import { FriendsController } from "../controller/friends.controller.js";
-import { displayTable } from "../core/display-table.js";
 import { ExistsError } from "../core/errors/exists.error.js";
+import { displayTable } from "../core/table/display.table.js";
+import { tableNavigation } from "../core/table/navigation.table.js";
 import { numberValidator, rangeValidator } from "../core/validators/number.validator.js";
 import { emailValidator, nameValidator, phoneValidator, requiredValidator } from "../core/validators/string.validator.js";
 import type { ValidatorFn } from "../core/validators/validator.types.js";
@@ -108,7 +109,7 @@ const searchFriend = async () => {
         console.log('No data matched!')
         return
     }
-    displayTable(matchedResult.data, { id: "", name: "", email: "", phone: "", balance: 0})
+    await tableNavigation(matchedResult.data, { id: "", name: "", email: "", phone: "", balance: 0})
 }
 
 const updateFriend = async () => {
@@ -127,7 +128,7 @@ const updateFriend = async () => {
     const indexedFriendsList = matchedResult.data.map((friend, index) => ({
         ...friend, index: index + 1 
     }))
-    displayTable(indexedFriendsList, { index: 0, id: "", name: "", email: "", phone: "", balance: 0 })
+    await tableNavigation(indexedFriendsList, { index: 0, id: "", name: "", email: "", phone: "", balance: 0 })
 
     const index = await ask('Enter the index of the friend you want to update: ', { validator: rangeValidator(1, matchedResult.data.length)});
 
@@ -173,7 +174,7 @@ const removeFriend = async () => {
         ...friend, index: index + 1
     }))
 
-    displayTable(indexedFriendsList, { index: 0, id: "", name: "", email: "", phone: "", balance: 0 })
+    await tableNavigation(indexedFriendsList, { index: 0, id: "", name: "", email: "", phone: "", balance: 0 })
 
     const index = await ask('Enter the index of the friend you want to delete: ', { validator: rangeValidator(1, matchedResult.data.length)})
     if(!index) return
@@ -181,7 +182,7 @@ const removeFriend = async () => {
     const friend = matchedResult.data[Number(index) - 1];
     if(!friend) return;
 
-    displayTable([friend], { id: "", name: "", email: "", phone: "", balance: 0 })
+    displayTable([friend], { id: "", name: "", email: "", phone: "", balance: 0 }, 1)
     
     const toDelete = await ask("Are your sure you want to delete your friend? (yes/no)", { defaultAnswer: "yes" });
 
@@ -208,7 +209,7 @@ const allFriends = async () => {
     }
 
     console.log('All friends')
-    displayTable(allFriends, { id: "", name: "", email: "", phone: "", balance: 0 });
+    await tableNavigation(allFriends, { id: "", name: "", email: "", phone: "", balance: 0 });
 }
 
 export const manageFriend = async () => {
